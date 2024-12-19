@@ -1,5 +1,7 @@
 const { MongoClient, ServerApiVersion } = require('mongodb')
 const express = require('express')
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
@@ -27,8 +29,22 @@ async function run() {
     const jobsCollection = db.collection('jobs')
     const bidsCollection = db.collection('bids')
 
+    // user request verify section for json web token
+    app.post('/jwt' , (req , res)=>{
+      const user = req.body;
+      const token = jwt.sign(user , process.env.SECRETE , {expiresIn: '12h'})
+      res.send(token)
+      console.log(token)
+    })
 
 
+
+    // all jobs show ui api section
+    app.get('/jobs' , async(req ,res)=>{
+      const cursor = jobsCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
     // solo jobs create section api 
     app.post('/add-job' , async(req , res)=>{
       const job = req.body;
@@ -37,6 +53,7 @@ async function run() {
       console.log(job)
       res.send(result)
     })
+
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
