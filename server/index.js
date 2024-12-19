@@ -52,12 +52,42 @@ async function run() {
       const result = await jobsCollection.findOne(cursor)
       res.send(result)
     })
+
+
+
+
+
+
     // solo jobs create section api 
     app.post('/add-job' , async(req , res)=>{
       const job = req.body;
       const result = await jobsCollection.insertOne(job)
 
       console.log(job)
+      res.send(result)
+    })
+    // user job bid section api section
+    app.post('/add-bid' , async(req , res)=>{
+      const data = req.body;
+
+      // already apply for this job (filter)
+      const cursor = {email: data.email , _id: new ObjectId(data.job_id)}
+      const filter = await bidsCollection.findOne(cursor)
+      if(filter){
+        return res
+        .status(400)
+        .send({message: 'you have Already bid this job!'})
+      }
+
+      // increase bid count of data base
+      const query = {_id: new ObjectId(data.job_id)}
+      const updateDoc = {
+        $inc: {bid_count: 1}
+      }
+      const bidCountUpdate = await jobsCollection.updateOne(query , updateDoc)
+
+      // add user bid for job post 
+      const result = await bidsCollection.insertOne(data)
       res.send(result)
     })
 
