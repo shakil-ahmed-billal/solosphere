@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 
 
 
+// eslint-disable-next-line react/prop-types
 const JobCard = ({ job }) => {
 
   const { title, dateLine, category, min_price, max_price, description, _id, bid_count, } = job || {}

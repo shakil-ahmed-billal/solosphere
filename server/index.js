@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
@@ -43,6 +43,13 @@ async function run() {
     app.get('/jobs' , async(req ,res)=>{
       const cursor = jobsCollection.find()
       const result = await cursor.toArray()
+      res.send(result)
+    })
+    // api job details api section 
+    app.get('/job/:id' , async(req , res)=>{
+      const id = req.params.id;
+      const cursor = {_id: new ObjectId(id)}
+      const result = await jobsCollection.findOne(cursor)
       res.send(result)
     })
     // solo jobs create section api 
