@@ -52,8 +52,20 @@ async function run() {
       const result = await jobsCollection.findOne(cursor)
       res.send(result)
     })
-
-
+    // my-posted-jobs section api make
+    app.get('/my-posted-jobs/:email' , async(req , res)=>{
+      const email = req.params.email;
+      const cursor = {"buyer.email": email}
+      const result = await jobsCollection.find(cursor).toArray()
+      res.send(result)
+    })
+    // my bid section api make
+    app.get('/my-bids/:email' , async(req , res)=>{
+      const email = req.params.email;
+      const query = {email};
+      const result = await bidsCollection.find(query).toArray()
+      res.send(result)
+    })
 
 
 

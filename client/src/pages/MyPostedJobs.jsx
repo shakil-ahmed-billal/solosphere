@@ -1,6 +1,33 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+// import axios from 'axios'
+import useAuth from './../hooks/useAuth';
+import axios from 'axios';
+import { format } from 'date-fns';
+
 
 const MyPostedJobs = () => {
+
+
+  const {user} = useAuth()
+  const [myPost , setPost] = useState([])
+  console.log("🚀 ~ MyPostedJobs ~ myPost:", myPost)
+
+  useEffect(()=>{
+
+
+  const data = async()=>{
+    const {data} = await axios.get(`${import.meta.env.VITE_LIVE}/my-posted-jobs/${user?.email}`)
+    setPost(data)
+    console.log(data)
+  }
+  data()
+  },[user])
+
+  
+
+  
+
   return (
     <section className='container px-4 mx-auto pt-12'>
       <div className='flex items-center gap-x-3'>
@@ -62,29 +89,29 @@ const MyPostedJobs = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  <tr>
+                  {myPost?.map(post => <tr key={post._id}>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      E-commerce Website Development
+                      {post?.title}
                     </td>
 
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      28/05/2024
+                      {format(new Date(post.dateLine), 'P')}
                     </td>
 
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      $500-$600
+                      $${post.min_price}-${post.max_price}
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
                       <div className='flex items-center gap-x-2'>
                         <p
                           className={`px-3 py-1  text-blue-500 bg-blue-100/60 text-xs  rounded-full`}
                         >
-                          Web Development
+                          {post.category}
                         </p>
                       </div>
                     </td>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      Dramatically redefine bleeding-edge...
+                      {post.description.slice(0 , 20)}...
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
                       <div className='flex items-center gap-x-6'>
@@ -126,7 +153,7 @@ const MyPostedJobs = () => {
                         </Link>
                       </div>
                     </td>
-                  </tr>
+                  </tr>)}
                 </tbody>
               </table>
             </div>
