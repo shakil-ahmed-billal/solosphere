@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { createContext, useEffect, useState } from 'react'
+import axios from 'axios'
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
+import { createContext, useEffect, useState } from 'react'
 import { app } from '../firebase/firebase.config'
 
 export const AuthContext = createContext(null)
@@ -49,10 +50,18 @@ const AuthProvider = ({ children }) => {
 
   // onAuthStateChange
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, currentUser => {
-      setUser(currentUser)
+    const unsubscribe = onAuthStateChanged(auth, async currentUser => {
       console.log('CurrentUser-->', currentUser)
-      setLoading(false)
+
+      if (currentUser) {
+        const userData = { email: currentUser.email }
+        setUser(currentUser)
+        setLoading(false)
+
+        const { data } = await axios.post(`${import.meta.env.VITE_LIVE}/jwt`, userData, {withCredentials: true})
+        console.log(data)
+      }
+
     })
     return () => {
       return unsubscribe()

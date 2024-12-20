@@ -1,4 +1,21 @@
+import { useEffect, useState } from "react"
+import useAuth from "../hooks/useAuth"
+import axios from "axios"
+import { format } from "date-fns"
+
 const BidRequests = () => {
+
+  const [bid , setBid] = useState([])
+  const {user} = useAuth()
+
+  useEffect(()=>{
+    const axiosData  = async () =>{
+      const {data} = await axios.get(`${import.meta.env.VITE_LIVE}/bid-request/${user?.email}`)
+      setBid(data)
+    }
+    axiosData()
+  },[user])
+  console.log(bid)
   return (
     <section className='container px-4 mx-auto my-12'>
       <div className='flex items-center gap-x-3'>
@@ -69,32 +86,32 @@ const BidRequests = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  <tr>
+                  {bid?.map(item =><tr key={item._id}>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      E-commerce Website Development
+                      {item.title}
                     </td>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      instructors@programming-hero.com
-                    </td>
-
-                    <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      28/05/2024
+                      {item.email}
                     </td>
 
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      $500
+                      {format(new Date(item.dateLine), 'P')}
+                    </td>
+
+                    <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
+                      ${item.price}
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
                       <div className='flex items-center gap-x-2'>
                         <p className='px-3 py-1 rounded-full text-blue-500 bg-blue-100/60 text-xs'>
-                          Web Development
+                          {item.category}
                         </p>
                       </div>
                     </td>
                     <td className='px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap'>
                       <div className='inline-flex items-center px-3 py-1 rounded-full gap-x-2 bg-yellow-100/60 text-yellow-500'>
                         <span className='h-1.5 w-1.5 rounded-full bg-green-500'></span>
-                        <h2 className='text-sm font-normal '>Complete</h2>
+                        <h2 className='text-sm font-normal '>{item.status}</h2>
                       </div>
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
@@ -134,7 +151,7 @@ const BidRequests = () => {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </tr>)}
                 </tbody>
               </table>
             </div>

@@ -8,8 +8,29 @@ require('dotenv').config()
 const port = process.env.PORT || 5000
 
 
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  credentials: true ,
+  optionalSuccessStatus: 200,
+}))
 app.use(express.json())
+app.use(cookieParser())
+
+const verifyToken = (req , res , next) =>{
+  const token = req.cookies?.token;
+  console.log(token)
+
+  if(!token){
+    return res.status(401).send({message: 'Unauthorize Access User'})
+  }
+  jwt.verify(token , process.env.SECRETE , (err , decode)=>{
+    if(err){
+      return res.status(401).send({message: 'Unauthorize Access User'})
+    }
+    req.user = decode
+    next()
+  })
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ldsdi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -33,8 +54,14 @@ async function run() {
     app.post('/jwt' , (req , res)=>{
       const user = req.body;
       const token = jwt.sign(user , process.env.SECRETE , {expiresIn: '12h'})
-      res.send(token)
-      console.log(token)
+
+      res
+      .cookie('token' , token , {
+        httpOnly: true ,
+        secure: process.env.NODE_ENV === 'production' ,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      })
+      .send(token)
     })
 
 
@@ -60,11 +87,24 @@ async function run() {
       res.send(result)
     })
     // my bid section api make
-    app.get('/my-bids/:email' , async(req , res)=>{
+    app.get('/my-bids/:email' , verifyToken, async(req , res)=>{
       const email = req.params.email;
+      const user = req.user;
+
+      if(email !== user.email){
+        return res.status(401).send({message: 'cote user'})
+      }
+
       const query = {email};
       const result = await bidsCollection.find(query).toArray()
       res.send(result)
+    })
+    // bid request section api make
+    app.get('/bid-request/:email' , async(req ,res)=>{
+      const email = req.params.email;
+      const query = {buyer: email};
+      const result = await bidsCollection.find(query).toArray()
+      res.send(result);
     })
 
 

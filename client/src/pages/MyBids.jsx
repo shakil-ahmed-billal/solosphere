@@ -1,4 +1,21 @@
+import axios from "axios"
+import { useEffect, useState } from "react"
+import useAuth from "../hooks/useAuth"
+import { format } from "date-fns"
+
 const MyBids = () => {
+
+  const [myBid , setBid] = useState([])
+  const {user} = useAuth()
+
+  useEffect(()=>{
+    const axiosData = async () =>{
+      const {data} = await axios.get(`${import.meta.env.VITE_LIVE}/my-bids/${user?.email}` , {withCredentials: true} )
+      setBid(data)
+    }
+    axiosData()
+  },[user])
+
   return (
     <section className='container px-4 mx-auto my-12'>
       <div className='flex items-center gap-x-3'>
@@ -61,24 +78,24 @@ const MyBids = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  <tr>
+                  {myBid?.map(bid =><tr key={bid._id}>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      E-commerce Website Development
+                      {bid.title}
                     </td>
 
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      28/05/2024
+                      {format(new Date(bid.dateLine), 'P')}
                     </td>
 
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
-                      $500
+                      ${bid.price}
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
                       <div className='flex items-center gap-x-2'>
                         <p
                           className={`px-3 py-1  text-blue-500 bg-blue-100/60 text-xs  rounded-full`}
                         >
-                          Web Development
+                          {bid.category}
                         </p>
                       </div>
                     </td>
@@ -89,7 +106,7 @@ const MyBids = () => {
                         <span
                           className={`h-1.5 w-1.5 rounded-full bg-yellow-500 `}
                         ></span>
-                        <h2 className='text-sm font-normal '>Pending</h2>
+                        <h2 className='text-sm font-normal '>{bid.status}</h2>
                       </div>
                     </td>
                     <td className='px-4 py-4 text-sm whitespace-nowrap'>
@@ -113,7 +130,7 @@ const MyBids = () => {
                         </svg>
                       </button>
                     </td>
-                  </tr>
+                  </tr>)}
                 </tbody>
               </table>
             </div>
